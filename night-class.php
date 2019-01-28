@@ -11,8 +11,9 @@ License: MIT
 
 add_action('admin_menu', 'DT_nightClassAdminMenu');
 add_action('admin_init', 'DT_nightClass_settings');
+add_action( 'widgets_init', 'DT_NightClass_registerWidget' );
 
-// Initiate the admin page in the menu
+// ADMIN PAGE
 function DT_nightClassAdminMenu() {
 	add_menu_page('Night Class', 'Night Class', 'manage_options', 'dannytran/nightclass.php', 'DT_nightClass_optionsMenu', 'dashicons-businessman', 6);
 }
@@ -91,4 +92,40 @@ function DT_nightClass_optionsMenu() {
 	<?php
 }
 
-// WIDGET;
+// WIDGET
+class DT_NightClass_Widget extends WP_Widget {
+    public function __construct() {
+	    $widget_options = array(
+            'classname' => 'night_class_widget',
+            'description' => 'Displays the UOD and date for the next NJROTC night class'
+        );
+
+	    parent::__construct('night_class_widget', 'Night Class Widget', $widget_options);
+    }
+
+    public function widget($args, $instance) {
+        $title = apply_filters( 'widget_title', $instance[ 'title' ] );
+        $blog_title = get_bloginfo( 'name' );
+        $tagline = get_bloginfo( 'description' );
+        echo $args['before_widget'] . $args['before_title'] . $title . $args['after_title']; ?>
+
+        <h3>Next Night Class:</h3>
+        <p align="center"><strong><?php echo esc_attr(get_option('dt_nightClass_date')); ?></strong></p>
+        <p align="center"><?php echo esc_attr(get_option('dt_nightClass_uod')); ?></p>
+        <p align="center"><?php echo esc_attr(get_option('dt_nightClass_activity')); ?></p>
+
+        <?php echo $args['after_widget'];
+    }
+
+	public function update($new_instance, $old_instance) {
+		$instance = $old_instance;
+		$instance['dt_nightClass_date'] = strip_tags( $new_instance['dt_nightClass_date']);
+		$instance['dt_nightClass_date'] = strip_tags( $new_instance['dt_nightClass_uod']);
+		$instance['dt_nightClass_date'] = strip_tags( $new_instance['dt_nightClass_activity']);
+		return $instance;
+	}
+}
+
+function DT_NightClass_registerWidget() {
+	register_widget('DT_NightClass_Widget');
+}
